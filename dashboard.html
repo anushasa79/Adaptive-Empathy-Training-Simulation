@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empathy Trainer - Interactive Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-image: url('https://image.pollinations.ai/prompt/futuristic%20cityscape%20at%20dusk%20with%20people%20interacting%20with%20holographic%20interfaces%2C%20glowing%20data%20tree%20in%20center%2C%20symbolizing%20connection%20and%20learning%2C%20AI%20elements%2C%20vibrant%20blue%20and%20orange%20lights?width=1200&height=800&seed=43');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #333;
+        }
+
+        header {
+            background-color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            color: #333;
+        }
+        
+        .logout-btn {
+            background-color: #f7b32d;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ffc457;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h2 {
+            color: white;
+            border-bottom: 2px solid #5d9cec;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        /* Dashboard Layout Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* Side panel (1 part) and Scenarios (2 parts) */
+            gap: 30px;
+        }
+        
+        /* Side Panel (Progress and Evaluation) */
+        .side-panel > div {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Evaluation Corner */
+        .evaluation-corner h3,
+        .progress-chart h3,
+        .daily-log h3 {
+            color: #386dc9;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 100px; 
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f0f4f8;
+            border: 1px solid #cce5ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5d9cec;
+            font-style: italic;
+        }
+
+        .chart-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .evaluation-corner p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .score {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4CAF50; 
+            display: block;
+            margin-bottom: 15px;
+            transition: color 0.3s;
+        }
+        
+        .report-link {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            background-color: #5d9cec;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .report-link:hover {
+            background-color: #4a8cdb;
+        }
+
+        /* --- Daily Log Styles --- */
+        .daily-log {
+             text-align: left;
+             color:black;
+        }
+        
+        .log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 0.95em;
+        }
+        
+        .log-score {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Scenarios Section */
+        .scenarios-list h3 {
+            color: white;
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .scenario-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+            border: 1px solid #cce5ff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .scenario-card.hidden { display: none; }
+        .scenario-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(93, 156, 236, 0.3); }
+
+        .scenario-card h4 {
+            color: #386dc9;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .scenario-card p {
+            font-size: 0.9em;
+            color: #555;
+            flex-grow: 1;
+        }
+        
+        /* --- NEW ACTION BUTTON STYLES --- */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            display: block;
+            padding: 8px 10px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s;
+            flex-grow: 1;
+            text-decoration: none; /* Ensure links look like buttons */
+            font-size: 0.9em;
+        }
+        
+        .report-action {
+            background-color: #f0f4f8; /* Light background for review */
+            color: #386dc9;
+            border: 1px solid #cce5ff;
+        }
+
+        .report-action:hover {
+             background-color: #e0e8f0;
+        }
+
+        .start-action, .primary-action {
+            background-color: #386dc9; /* Primary color for starting */
+            color: white;
+            border: 1px solid #386dc9;
+        }
+        
+        .start-action:hover, .primary-action:hover {
+            background-color: #2c5ba7;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-completed { background-color: #4CAF50; color: white; }
+        .badge-todo { background-color: #f7b32d; color: #333; }
+        .badge-retry { background-color: #E91E66; color: white; }
+        
+        /* Filter Bar Styles */
+        .filter-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover { border-color: #5d9cec; }
+        .filter-btn.active { background-color: #5d9cec; color: white; border-color: #5d9cec; }
+        
+        /* Loading Indicator */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #5d9cec;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .loading-text {
+            color: #555;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Toast notification for storage mode */
+        .storage-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            opacity: 0.7;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Synchronizing Progress...</div>
+    </div>
+    
+    <div id="storage-toast" class="storage-toast" style="display:none;">Using Local Storage Mode</div>
+
+    <header>
+        <h1>Empathy Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="dashboard-container">
+        <h2>Your Empathy Training Hub</h2>
+        
+        <div class="dashboard-grid">
+            
+            <div class="side-panel">
+                
+                <div class="evaluation-corner">
+                    <div class="chart-placeholder">
+                        <img src="https://copilot.microsoft.com/th/id/BCO.97307781-0c6d-49e4-9443-055d2fc1a4a5.png" alt="Score Visualization" onerror="this.style.display='none'">
+                    </div>
+                    
+                    <h3>Evaluation Corner</h3>
+                    <p id="last-scenario-name">Last Scenario: Loading...</p>
+                    <p>Your Empathy Score:</p>
+                    <span class="score" id="last-empathy-score">--%</span>
+                    <a href="results.html" class="report-link" id="view-report-link">View Detailed Report →</a>
+                </div>
+                
+                <div class="progress-chart">
+                    <h3>Daily Progress Trend</h3>
+                    <div class="chart-placeholder">
+                         <img src="Gemini_Generated_Image_ahi2swahi2swahi2 (1).png" onerror="this.src='https://placehold.co/400x200?text=Progress+Chart'" alt="Progress Chart">
+                    </div>
+                    <p style="font-size:0.9em; margin-top: 15px; color:black;">Overall trend is <span id="trend-status" style="font-weight:bold;">calculating...</span> this week!</p>
+                </div>
+
+                <div class="daily-log">
+                    <h3>Daily Achievements Log</h3>
+                    <ul class="log-list" id="daily-log-list">
+                        <li>Loading scenario history...</li>
+                    </ul>
+                </div>
+                
+            </div>
+            
+            <div class="scenarios-list">
+                <h3>Choose Your Next Scenario</h3>
+                
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all" onclick="filterScenarios(this, 'all')">All Scenarios</button>
+                    <button class="filter-btn" data-filter="todo" onclick="filterScenarios(this, 'todo')">To Do (<span id="todo-count">0</span>)</button>
+                    <button class="filter-btn" data-filter="completed" onclick="filterScenarios(this, 'completed')">Completed (<span id="completed-count">0</span>)</button>
+                    <button class="filter-btn" data-filter="retry" onclick="filterScenarios(this, 'retry')">Needs Retry (<span id="retry-count">0</span>)</button>
+                </div>
+                
+                <div class="scenarios-grid" id="scenarios-grid">
+                    <p id="scenario-loading-message" style="text-align:center; color: #666;">Loading scenarios...</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURATION ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Graceful fallback: If firebase config is missing, use empty object to trigger local mode
+        const firebaseConfigRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+        
+        let db, auth, userId;
+        let useLocalStorage = false;
+        
+        // --- INITIAL DATA STRUCTURE ---
+        const INITIAL_SCENARIOS = [
+            { id: 'customer', title: 'Customer Service Call', description: 'Handle a frustrated client whose product delivery is late. Focus on active listening.', status: 'todo', score: null, url: 'scenario-chat.html?s=customer', feedback: '', keyAreas: '' },
+            { id: 'review', title: 'Difficult Performance Review', description: 'Deliver constructive feedback to a direct report struggling with motivation.', status: 'todo', score: null, url: 'scenario-chat.html?s=review', feedback: '', keyAreas: '' },
+            { id: 'culture', title: 'Intercultural Conflict', description: 'Mediate a dispute between colleagues with different communication styles.', status: 'todo', score: null, url: 'scenario-chat.html?s=culture', feedback: '', keyAreas: '' },
+            { id: 'medical', title: 'Medical Consultation', description: 'Gently inform a patient about a complex medical diagnosis and treatment.', status: 'todo', score: null, url: 'scenario-chat.html?s=medical', feedback: '', keyAreas: '' },
+            { id: 'negotiation', title: 'Vendor Negotiation', description: 'Negotiate contract terms while maintaining a positive relationship.', status: 'todo', score: null, url: 'scenario-chat.html?s=negotiation', feedback: '', keyAreas: '' },
+            { id: 'colleague', title: 'Supporting a Colleague', description: 'Offer support to a colleague experiencing personal burnout and stress.', status: 'todo', score: null, url: 'scenario-chat.html?s=colleague', feedback: '', keyAreas: '' }
+        ];
+
+        // --- INIT LOGIC ---
+        async function initApp() {
+            try {
+                const firebaseConfig = JSON.parse(firebaseConfigRaw);
+                if (Object.keys(firebaseConfig).length > 0) {
+                    // Firebase Mode
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    onAuthStateChanged(auth, async (user) => {
+                        if (!user) {
+                            const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                            if (token) await signInWithCustomToken(auth, token);
+                            else await signInAnonymously(auth);
+                        }
+                        userId = auth.currentUser?.uid;
+                        await handleDataLoad();
+                    });
+                } else {
+                    throw new Error("Empty Config");
+                }
+            } catch (e) {
+                // Local Storage Mode Fallback
+                console.warn("Firebase config missing or invalid. Switching to Local Storage mode.");
+                useLocalStorage = true;
+                userId = "local_user";
+                document.getElementById('storage-toast').style.display = 'block';
+                await handleDataLoad();
+            }
+        }
+
+        // --- DATA HANDLING ABSTRACTION ---
+        
+        async function loadUserData() {
+            if (useLocalStorage) {
+                const data = localStorage.getItem('empathy_dashboard_data');
+                return data ? JSON.parse(data) : null;
+            } else {
+                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'empathy_data', 'progress');
+                const docSnap = await getDoc(docRef);
+                return docSnap.exists() ? docSnap.data() : null;
+            }
+        }
+
+        async function saveUserData(data) {
+            if (useLocalStorage) {
+                localStorage.setItem('empathy_dashboard_data', JSON.stringify(data));
+            } else {
+                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'empathy_data', 'progress');
+                await setDoc(docRef, data);
+            }
+        }
+
+        // --- SIMULATION LOGIC (The "Dynamic" Part) ---
+        function simulateNewSession(currentData) {
+            const allScenarios = currentData.scenarios;
+            let candidateScenarios = allScenarios.filter(s => s.status === 'todo' || s.status === 'retry');
+            if (candidateScenarios.length === 0) candidateScenarios = allScenarios;
+            
+            if (candidateScenarios.length > 0) {
+                const scenario = candidateScenarios[Math.floor(Math.random() * candidateScenarios.length)];
+                
+                // Random Score Calculation (skewed towards 60-95)
+                const newScore = Math.floor(Math.random() * 35) + 60; 
+                
+                scenario.score = newScore;
+                scenario.status = newScore >= 75 ? 'completed' : 'retry';
+                
+                const feedbacks = [
+                    "Great use of active listening!",
+                    "You could improve on validating their feelings.",
+                    "Excellent de-escalation techniques used.",
+                    "Try to ask more open-ended questions next time."
+                ];
+                scenario.feedback = feedbacks[Math.floor(Math.random() * feedbacks.length)];
+                
+                currentData.lastScenario = scenario.title;
+                currentData.lastScore = newScore;
+                
+                currentData.log.push({
+                    title: scenario.title,
+                    score: newScore,
+                    date: new Date().toLocaleDateString()
+                });
+
+                if (currentData.log.length > 5) currentData.log.shift();
+
+                if (newScore > 85) currentData.overallTrend = "Excellent";
+                else if (newScore > 70) currentData.overallTrend = "Improving";
+                else currentData.overallTrend = "Needs Practice";
+            }
+            return currentData;
+        }
+
+        async function handleDataLoad() {
+            let userData = await loadUserData();
+
+            if (!userData) {
+                userData = {
+                    lastScenario: "None",
+                    lastScore: 0,
+                    overallTrend: "N/A",
+                    scenarios: JSON.parse(JSON.stringify(INITIAL_SCENARIOS)),
+                    log: []
+                };
+            }
+
+            // SIMULATE NEW DATA ON EVERY LOAD
+            const updatedData = simulateNewSession(userData);
+            
+            // SAVE IT
+            await saveUserData(updatedData);
+
+            // RENDER IT
+            renderDashboard(updatedData);
+            
+            setTimeout(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }, 500);
+        }
+
+        // --- RENDERING ---
+        function createScenarioCardHTML(scenario) {
+            const statusClass = `badge-${scenario.status}`;
+            const statusText = scenario.status === 'completed' ? 'Completed' : 
+                               scenario.status === 'retry' ? 'Needs Retry' : 'To Do';
+            const scoreInDescription = scenario.score ? ` (Last Score: ${scenario.score}%)` : '';
+
+            // This URL is always for starting the chat (New Conversation/Redo)
+            const newConversationUrl = scenario.url; // e.g., 'scenario-chat.html?s=customer'
+
+            let reportUrl = '#'; 
+            let actionButtonsHTML;
+
+            if (scenario.score !== null) {
+                const encodedTitle = encodeURIComponent(scenario.title);
+                const encodedFeedback = encodeURIComponent(scenario.feedback || 'Good effort.');
+                const encodedKeyAreas = encodeURIComponent(scenario.keyAreas || 'General Communication');
+                // The URL for the results page needs the data
+                reportUrl = `results.html?title=${encodedTitle}&score=${scenario.score}&feedback=${encodedFeedback}&areas=${encodedKeyAreas}&status=${scenario.status}`;
+            }
+
+            if (scenario.status === 'todo') {
+                // If 'todo', show only the primary 'Start' button
+                actionButtonsHTML = `
+                    <a href="${newConversationUrl}" class="action-btn primary-action">Start Scenario →</a>
+                `;
+            } else {
+                // If 'completed' or 'retry', show both Review and Redo buttons
+                actionButtonsHTML = `
+                    <div class="card-actions">
+                        <a href="${reportUrl}" class="action-btn report-action">Review Report</a>
+                        <a href="${newConversationUrl}" class="action-btn start-action">Redo Scenario →</a>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="scenario-card" data-status="${scenario.status}">
+                    <h4>
+                        <span style="display: flex; align-items: center;">
+                            ${scenario.title}
+                        </span>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </h4>
+                    <p>${scenario.description}${scoreInDescription}</p>
+                    ${actionButtonsHTML}
+                </div>
+            `;
+        }
+
+        function renderDashboard(data) {
+            const { lastScenario, lastScore, overallTrend, scenarios, log } = data;
+
+            // Evaluation Corner
+            const scoreEl = document.getElementById('last-empathy-score');
+            const scoreColor = lastScore >= 80 ? '#4CAF50' : lastScore >= 70 ? '#f7b32d' : '#E91E66';
+            
+            document.getElementById('last-scenario-name').textContent = `Last Session: ${lastScenario}`;
+            scoreEl.textContent = `${lastScore}%`;
+            scoreEl.style.color = scoreColor;
+
+            const lastScenObj = scenarios.find(s => s.title === lastScenario);
+            if(lastScenObj && lastScenObj.score !== null) {
+                 const encodedTitle = encodeURIComponent(lastScenObj.title);
+                 const encodedFeedback = encodeURIComponent(lastScenObj.feedback || 'N/A');
+                 const reportUrl = `results.html?title=${encodedTitle}&score=${lastScenObj.score}&feedback=${encodedFeedback}&status=${lastScenObj.status}`;
+                 document.getElementById('view-report-link').href = reportUrl;
+            } else {
+                 document.getElementById('view-report-link').href = '#'; // Disable if no report exists
+            }
+
+            // Progress Trend
+            document.getElementById('trend-status').textContent = overallTrend;
+
+            // Daily Log
+            const logList = document.getElementById('daily-log-list');
+            logList.innerHTML = ''; 
+            
+            if (log.length > 0) {
+                [...log].reverse().forEach(entry => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'log-item';
+                    const entryColor = entry.score >= 80 ? '#4CAF50' : entry.score >= 70 ? '#f7b32d' : '#E91E66';
+                    listItem.innerHTML = `
+                        <span>${entry.title}</span>
+                        <span class="log-score" style="color: ${entryColor};">${entry.score}%</span>
+                    `;
+                    logList.appendChild(listItem);
+                });
+            } else {
+                logList.innerHTML = '<li>No completed scenarios yet.</li>';
+            }
+
+            // Grid
+            const grid = document.getElementById('scenarios-grid');
+            grid.innerHTML = ''; 
+            
+            let counts = { todo: 0, completed: 0, retry: 0 };
+            
+            scenarios.forEach(s => {
+                grid.insertAdjacentHTML('beforeend', createScenarioCardHTML(s));
+                if (counts[s.status] !== undefined) counts[s.status]++;
+            });
+            
+            document.getElementById('todo-count').textContent = counts.todo;
+            document.getElementById('completed-count').textContent = counts.completed;
+            document.getElementById('retry-count').textContent = counts.retry;
+
+            // Filter
+            const activeFilterBtn = document.querySelector('.filter-btn.active');
+            if(activeFilterBtn) {
+                 filterScenarios(activeFilterBtn, activeFilterBtn.dataset.filter);
+            } else {
+                 filterScenarios(document.querySelector('.filter-btn[data-filter="all"]'), 'all');
+            }
+        }
+        
+        // --- START ---
+        initApp();
+
+        // --- GLOBAL FUNCTIONS ---
+        window.filterScenarios = function(element, filter) {
+            const cards = document.querySelectorAll('.scenario-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            cards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                if (filter === 'all' || status === filter) card.classList.remove('hidden');
+                else card.classList.add('hidden');
+            });
+        }
+        
+        window.logout = function() {
+            if (auth) auth.signOut();
+            if (useLocalStorage) localStorage.removeItem('empathy_dashboard_data');
+            setTimeout(() => { window.location.href = 'index.html'; }, 300);
+        }
+    </script>
+</body>
+</html>

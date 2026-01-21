@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Empathy Trainer - Scenario</title>
+    <style>
+        /* Styles adapted from the original file for a clean chat experience */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9f5ff; /* Light blue background */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #5d9cec;
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .back-btn {
+            background-color: #f7b32d;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #ffc457;
+        }
+        
+        /* Main Chat Area */
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            width: 90%;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .chat-title {
+            padding: 20px;
+            background-color: #cce5ff;
+            color: #4a8cdb;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-bottom: 1px solid #a6d8ff;
+        }
+
+        
+        .message-area {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px); /* Adjust based on header/input height */
+            background-color: white;
+             display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+  
+        .ai-message {
+            align-self: flex-start;
+            background-color: #5d9cec;
+            color: white;
+            border-top-left-radius: 5px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #a8d5ba;
+            color: #333;
+            border-top-right-radius: 5px;
+        }
+
+
+        /* Input Area */
+        .input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            background-color: #3b67b4;
+        }
+
+        .input-area textarea {
+            flex-grow: 1;
+            resize: none;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+
+        .send-btn {
+            background-color:  #81d7f1;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background-color: #81d7f1;
+        }
+        
+        .send-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        
+        .score-display {
+            padding: 10px 20px;
+            background-color: #e8f5e9; /* Light green background */
+            text-align: center;
+            font-weight: bold;
+            color: #386dc9; /* Dark green text */
+            border-bottom:1px solid #cce5ff;
+        }
+    </style>
+</head>
+<body>
+   <div class="header-container">
+        <h1 id="scenario-title" class="text-2xl font-bold text-gray-800">Scenario: Loading...</h1>
+        <button class="back-btn px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition" 
+                onclick="window.location.href='dashboard.html'">
+            Back to Dashboard
+        </button>
+    </div>
+
+    <div class="score-display">
+        Current Empathy Score: <span id="current-score">50</span>
+    </div>
+    
+    <div class="chat-container">
+        <div class="message-area" id="message-area">
+        </div>
+        
+        <div class="input-area">
+            <textarea id="user-input" placeholder="Type your empathetic response..." rows="2"></textarea>
+            <button class="send-btn" onclick="sendEmpathyResponse()">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        // --- ADDED: MOCK USER ID FOR BACKEND COMMUNICATION ---
+        const MOCK_USER_ID = 'user123';
+        // ----------------------------------------------------
+
+        // Use document.getElementById directly within functions or scope, 
+        // avoiding unused global variables.
+        
+        // --- NEW HELPER FUNCTION ---
+        /**
+         * Adds a message to the chat container.
+         * @param {string} text - The message content.
+         * @param {string} sender - 'user' or 'ai'.
+         * @param {string} [scoreInfo=''] - Optional score change info for AI messages.
+         */
+        function addMessage(text, sender, scoreInfo = '') {
+            const chatContainer = document.getElementById('message-area');
+            
+            // Determine the styling based on the sender
+            let bgColor, textColor, justifyClass, infoText = '';
+            
+            if (sender === 'user') {
+                bgColor = 'bg-blue-500';
+                textColor = 'text-white';
+                justifyClass = 'justify-end';
+            } else { // 'ai' (or customer/initial challenge)
+                bgColor = 'bg-gray-200';
+                textColor = 'text-gray-800';
+                justifyClass = 'justify-start';
+                if (scoreInfo) {
+                    infoText = `<strong>Critique (${scoreInfo}):</strong> `;
+                }
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${justifyClass} mb-4`;
+            messageDiv.innerHTML = `
+                <div class="${bgColor} ${textColor} p-3 rounded-lg max-w-xs shadow-md">
+                    ${infoText}${text}
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+        }
+        // ---------------------------
+
+        /**
+         * Sends the user's response to the backend for AI critique and updates the UI.
+         */
+        async function sendEmpathyResponse() {
+            // 1. Get elements and user input
+            const inputField = document.getElementById('user-input');
+            const scoreDisplay = document.getElementById('current-score');
+            const userInput = inputField.value.trim();
+            
+            let currentScore = parseInt(scoreDisplay.textContent) || 50; 
+
+            if (!userInput) {
+                return;
+            }
+
+            // --- 1. Display User Message and Clear Input (CRITICAL FIX) ---
+            addMessage(userInput, 'user');
+            
+            // CRUCIAL FIX: Clear the input field immediately
+            inputField.value = ''; 
+            
+            // Show a temporary loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'ai-loading';
+            loadingDiv.className = 'flex justify-start mb-4';
+            loadingDiv.innerHTML = `
+                <div class="bg-gray-200 text-gray-700 p-3 rounded-lg max-w-xs shadow-md animate-pulse">
+                    AI is thinking...
+                </div>
+            `;
+            document.getElementById('message-area').appendChild(loadingDiv);
+            document.getElementById('message-area').scrollTop = document.getElementById('message-area').scrollHeight; 
+
+            // --- 2. Send Request to Backend (server.js) ---
+            try {
+                // Get the scenario ID for the API request
+                const scenarioId = getScenarioId(); 
+
+                const response = await fetch('http://localhost:3000/api/get-ai-response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        // --- CRITICAL CHANGES FOR BACKEND PERSISTENCE ---
+                        userId: MOCK_USER_ID, 
+                        userResponse: userInput,
+                        scenarioId: scenarioId
+                        // ------------------------------------------------
+                    })
+                });
+
+                // Remove loading indicator
+                const loader = document.getElementById('ai-loading');
+                if (loader) loader.remove();
+
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const scoreDelta = data.scoreDelta || 0; 
+
+                // --- 3. Update UI with AI Response ---
+                
+                // Update the score
+                const newScore = Math.max(0, Math.min(100, currentScore + scoreDelta)); // Keep score between 0 and 100
+                scoreDisplay.textContent = newScore; 
+
+                // Display AI message (critique) using the helper function
+                const scoreText = scoreDelta > 0 ? `+${scoreDelta}` :` ${scoreDelta}`;
+                addMessage(data.aiResponse, 'ai', scoreText);
+
+                // Reset focus for easy typing
+                inputField.focus();    
+
+            } catch (error) {
+                console.error('Error sending response:', error);
+                
+                // Remove loading indicator
+                const loader = document.getElementById('ai-loading');
+                if (loader) loader.remove();
+                
+                // Display an error message in the chat
+                addMessage(`Error: Failed to get AI response. Check the server terminal for details. (${error.message})`, 'ai', 'ERROR');
+                inputField.focus();
+            }
+        }
+        
+        /**
+         * Utility to get the scenario ID from the URL query parameter (?s=...).
+         */
+        function getScenarioId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('s') || 'default';
+        }
+
+        /**
+         * Maps scenario IDs to titles and initial challenge messages.
+         */
+        const SCENARIO_MESSAGES = {
+            'customer': { 
+                title: 'Customer Service Call',
+                challenge: "The customer begins: 'I've been waiting three weeks for my order! Your delivery estimate was wrong, and I'm furious. What are you going to do about this mess?'"
+            },
+            'review': { 
+                title: 'Difficult Performance Review',
+                challenge: "The employee sighs, leaning back: 'I appreciate the feedback, but honestly, I'm just burnt out. I feel like my best isn't good enough anymore. What's the point?'"
+            },
+            'culture': { 
+                title: 'Intercultural Conflict',
+                challenge: "Colleague A tells you: 'I feel attacked every time Colleague B gives me a direct order. Their tone is aggressive and completely lacks respect for our team hierarchy.'"
+            },
+            'medical': { 
+                title: 'Medical Consultation',
+                challenge: "The patient is quiet, hands trembling: 'You said the tests were back. Just... please tell me what it is. I need to know the worst-case scenario right now.'"
+            },
+            'default': { 
+                title: 'General Training', 
+                challenge: 'Welcome to the Empathy Trainer. A simple challenge begins now: How do you start a conversation with a colleague who looks visibly upset?' 
+            }
+        };
+
+        /**
+         * Loads scenario details and displays the initial challenge message.
+         */
+        function loadScenario() {
+            const scenarioId = getScenarioId();
+            const scenario = SCENARIO_MESSAGES[scenarioId] || SCENARIO_MESSAGES['default'];
+
+            document.getElementById('scenario-title').textContent = 'Scenario: ' + scenario.title;
+            document.getElementById('page-title').textContent = 'Empathy Trainer - ' + scenario.title;
+            
+            // Display the initial AI challenge message using the helper function
+            addMessage(scenario.challenge, 'ai');
+            
+            // Update the score display initially (initial score is 50)
+            document.getElementById('current-score').textContent = 50;
+
+            // Add listener for Enter key in the textarea
+            const inputField = document.getElementById('user-input');
+            inputField.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault(); // Prevent new line
+                    sendEmpathyResponse();
+                }
+            });
+        }
+
+        // Run the initialization function when the page loads
+        window.onload = loadScenario;
+function calculateScore(userText) {
+    let score = 50; // base score
+
+    // Positive empathy keywords
+    const positiveWords = ["understand", "sorry", "help", "appreciate", "support", "guide"];
+    positiveWords.forEach(word => {
+        if (userText.toLowerCase().includes(word)) score += 5;
+    });
+
+    // Negative tone reduction
+    const negativeWords = ["fault", "angry", "problem", "blame"];
+    negativeWords.forEach(word => {
+        if (userText.toLowerCase().includes(word)) score -= 5;
+    });
+
+    if (score > 100) score = 100;
+    if (score < 0) score = 0;
+
+    return score;
+}
+
+function saveFinalScore(scenarioKey) {
+    let userText = document.getElementById("userInput").value; // adjust if needed
+    let finalScore = calculateScore(userText);
+
+    let history = JSON.parse(localStorage.getItem("scoreHistory")) || {};
+
+    if (!history[scenarioKey]) {
+        history[scenarioKey] = [];
+    }
+
+    history[scenarioKey].push({
+        score: finalScore,
+        date: new Date().toISOString()
+    });
+
+    localStorage.setItem("scoreHistory", JSON.stringify(history));
+
+    // Redirect to results page
+    window.location.href = "results.html";
+}
+    </script>
+</body>
+</html>

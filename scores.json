@@ -1,0 +1,32 @@
+{
+  "lastScore": 85,
+  "lastSessionTitle": "Customer Service Call (Nov 14)",
+  "lastSessionDate": "Nov 14",
+  "dailyReport": {
+    "finalScore": 85,
+    "summary": "You showed strong de-escalation skills and active listening during this session.",
+    "metrics": [
+      {
+        "name": "Active Listening",
+        "score": 95,
+        "feedback": "Excellent use of reflective statements and summarizing the client's problem."
+      },
+      {
+        "name": "Tone & Language",
+        "score": 80,
+        "feedback": "Generally empathetic, but occasionally sounded robotic when offering solutions."
+      },
+      {
+        "name": "Problem Resolution",
+        "score": 75,
+        "feedback": "Took too long to offer a concrete step forward after acknowledging the frustration."
+      }
+    ]
+  },
+  "log": [
+    { "session": "Performance Review", "score": 85 },
+    { "session": "Customer Service", "score": 70 },
+    { "session": "Intercultural Conflict", "score": 88 },
+    { "session": "Medical Consultation", "score": 75 }
+  ]
+}

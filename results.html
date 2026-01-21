@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scenario Results - Empathy Trainer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            background-image: url('https://image.pollinations.ai/prompt/futuristic%20cityscape%20at%20dusk%20with%20people%20interacting%20with%20holographic%20interfaces%2C%20glowing%20data%20tree%20in%20center%2C%20symbolizing%20connection%20and%20learning%2C%20AI%20elements%2C%20vibrant%20blue%20and%20orange%20lights?width=1200&height=800&seed=43');
+            background-size: cover;
+            background-attachment: fixed;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .report-container {
+            max-width: 700px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header-bg {
+            background-color: #5d9cec;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .feedback-box {
+            background: #f9f9f9;
+            border-left: 5px solid #5d9cec;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #f7b32d;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn:hover { background-color: #ffc457; }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="header-bg">
+            <h1 id="r-title">Scenario Report</h1>
+        </div>
+        
+        <p>Your Empathy Score:</p>
+        <div class="score-display" id="r-score">--%</div>
+        
+        <div class="feedback-box">
+            <h3>Trainer Feedback:</h3>
+            <p id="r-feedback">Loading...</p>
+        </div>
+
+        <a href="dashboard.html" class="btn">Return to Dashboard</a>
+    </div>
+
+    <script>
+        // Parse URL parameters to display the data passed from the dashboard
+        const params = new URLSearchParams(window.location.search);
+        
+        const title = params.get('title');
+        const score = params.get('score');
+        const feedback = params.get('feedback');
+
+        if(title) document.getElementById('r-title').textContent = title;
+        
+        const scoreEl = document.getElementById('r-score');
+        if(score) {
+            scoreEl.textContent = score + "%";
+            if(score >= 80) scoreEl.style.color = "#4CAF50";
+            else if(score >= 70) scoreEl.style.color = "#f7b32d";
+            else scoreEl.style.color = "#E91E66";
+        }
+
+        if(feedback) document.getElementById('r-feedback').textContent = feedback;
+    </script>
+</body>
+</html>
